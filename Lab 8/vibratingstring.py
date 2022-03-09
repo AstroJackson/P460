@@ -21,8 +21,7 @@ def flat_then_peak(x):
         return -x + .6
 
 def phi_sin(x, n, *args):
-    #phi = gaussian(x, *args)
-    phi = flat_then_peak(x)
+    phi = gaussian(x, *args)
     return phi * np.sin(n*pi*x/a)
 
 def psi_sin(x, n, *args):
