@@ -6,11 +6,14 @@ import matplotlib.patches as mpl_patches
 
 a = 1.
 c = 1.
+k = .1
 pi = np.pi
-s = .03
+s = .01
+points = 500
 
 def gaussian(x, sigma = 1):
-    return 1 /(np.sqrt(2*pi)) * np.exp( -(x-a/2)**2/ (2*sigma**2))
+    value_at_0 = 1 /(np.sqrt(2*pi)) * np.exp( -(0-a/2)**2/ (2*sigma**2)) # ensure boundary conditions are satisfied, though this is not required
+    return 1 /(np.sqrt(2*pi)) * np.exp( -(x-a/2)**2/ (2*sigma**2)) - value_at_0
 
 def flat_then_peak(x):
     if x <= 0.4 or x >= .6:
@@ -20,9 +23,17 @@ def flat_then_peak(x):
     else:
         return -x + .6
 
+def quad(x):
+    return x*x
+
+def order3(x):
+    return 15 * (x**3-1.42*x**2 + .5*x)
+
 def phi_sin(x, n, *args):
-    phi = gaussian(x, *args)
+    phi = order3(x)
     return phi * np.sin(n*pi*x/a)
+
+#plt.plot(np.linspace(0, a, points), gaussian(np.linspace(0, a, points), s))
 
 def psi_sin(x, n, *args):
     psi = 0
@@ -39,23 +50,37 @@ def Bn(n, *args):
 # integration = integrate(phi_sin, 0, a, args = (1, 2))
 # print(integration)
 
-points = 500
+#points = 500
 x = np.linspace(0, a, points)
 
-max_time = 10
-interval = 0.03
+max_time = 5
+interval = 0.009 # timestep, in seconds
 total_frames = int(max_time/interval)
-times = np.linspace(0, max_time, total_frames)
+times = np.arange(0, max_time, interval)
 u = [0 for i in range(len(times))]
-for i, t in enumerate(times):
-    value = np.zeros(points)
-    for m in range(1, 50): 
-        value += np.sin(m*pi*x/a) * (An(m, s)*np.cos(m*pi*c*t/a) + Bn(m, s)*np.sin(m*pi*c*t/a))
 
-    u[i] = value
+wave_equation = False
+dif_equation = True
+if wave_equation:
+    for i, t in enumerate(times):
+        value = np.zeros(points)
+        for m in range(1, 50): 
+            value += np.sin(m*pi*x/a) * (An(m, s)*np.cos(m*pi*c*t/a) + Bn(m, s)*np.sin(m*pi*c*t/a))
+
+        u[i] = value
+
+if dif_equation:
+    for i, t in enumerate(times):
+        value = np.zeros(points)
+        for m in range(1, 50): 
+            value += np.sin(m*pi*x/a) * (An(m, s)*np.exp(-k*m*m*t))
+
+        u[i] = value
 #print(u)
 
 u_array = np.array(u)
+
+#plt.plot(x, u[0])
 
 
 # plt.figure(figsize=(15,8))
@@ -82,7 +107,8 @@ def update(frame):
     ln.set_data(x, u[frame])
     return time_text, ln
 
-ani = FuncAnimation(fig, update, frames = range(0, total_frames), init_func=init, blit=True)
+wait_time = interval*1000 *.5
+ani = FuncAnimation(fig, update, frames = len(times), init_func=init, blit=True, interval = wait_time, cache_frame_data = True)
 
 ax.set_xlabel("x")
 ax.set_ylabel("Height")
