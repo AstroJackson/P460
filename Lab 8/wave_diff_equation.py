@@ -37,7 +37,7 @@ def order3(x):
     return 15 * (x**3-1.42*x**2 + .5*x)
 
 def phi_sin(x, n, *args):
-    phi = flat_then_peak(x) #initial condition
+    phi = order3(x) #initial condition
     """^^This can be edited. The above functions are just examples I tested."""  
     return phi * np.sin(n*pi*x/a) #function to be integrated over to determine the FS coefficient
 
