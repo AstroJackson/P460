@@ -38,7 +38,8 @@ def psi_t0(x):
        return np.cos(k*x) / norm**0.5
  
 ## Custom potentials:
-N = 500
+N = 500 # number of x values in the given interval
+ # N is also the number of ODE's in the system of ODE's that must be solved
 x = np.linspace(-5*a, 5*a, N+1)
 dx = x[1] - x[0]
 def V1(x):
@@ -52,6 +53,10 @@ def V2(x):
        return 0
    else:
        return 2*V0
+
+def V_absx(x):
+    return np.abs(x)
+
 V_used = V1
 used_potential = "V1"
 V = [V_used(x) for x in x]
@@ -101,6 +106,8 @@ time_text = ax.text(0.025, np.min(psi_real)+0.01, "")
 ln_real, = ax.plot([], [], label = "Real")
 ln_imag, = ax.plot([], [], label = "Imaginary")
 ln_squared, = ax.plot([], [], label = "Mod Squared")
+
+potential, = ax.plot(x, [V_used(x) * 1/150 for x in x], color = "purple", label = "Potential Function")
  
 def init():
    time_text.set_text('0')
